@@ -1,0 +1,97 @@
+{
+  "demo_alex": {
+    "name": "Alex (Demo)",
+    "linkedin_url": "Synthetic demo profile",
+    "instagram_url": "Synthetic demo profile",
+    "source_status": "Synthetic demo data — not real research",
+    "knowledge": {
+      "name": "Alex (Demo)",
+      "professional_background": [
+        {
+          "fact": "Works as a software developer",
+          "source": "Demo data",
+          "evidence": "Synthetic example"
+        }
+      ],
+      "interests": [
+        {
+          "fact": "Technology and artificial intelligence",
+          "source": "Demo data",
+          "evidence": "Synthetic example"
+        },
+        {
+          "fact": "Photography",
+          "source": "Demo data",
+          "evidence": "Synthetic example"
+        }
+      ],
+      "hobbies": [
+        {
+          "fact": "Hiking and landscape photography",
+          "source": "Demo data",
+          "evidence": "Synthetic example"
+        }
+      ],
+      "lifestyle_signals": [],
+      "values_explicitly_stated": [],
+      "dating_preferences_explicitly_stated": [],
+      "conversation_topics": [
+        "Technology",
+        "Photography",
+        "Travel"
+      ],
+      "unknown_information": [
+        "Actual dating preferences are unknown"
+      ],
+      "short_summary": "Fictional software developer interested in technology, photography and hiking."
+    }
+  },
+  "demo_sam": {
+    "name": "Sam (Demo)",
+    "linkedin_url": "Synthetic demo profile",
+    "instagram_url": "Synthetic demo profile",
+    "source_status": "Synthetic demo data — not real research",
+    "knowledge": {
+      "name": "Sam (Demo)",
+      "professional_background": [
+        {
+          "fact": "Works in digital marketing",
+          "source": "Demo data",
+          "evidence": "Synthetic example"
+        }
+      ],
+      "interests": [
+        {
+          "fact": "Creative writing and travel",
+          "source": "Demo data",
+          "evidence": "Synthetic example"
+        },
+        {
+          "fact": "Food and culture",
+          "source": "Demo data",
+          "evidence": "Synthetic example"
+        }
+      ],
+      "hobbies": [
+        {
+          "fact": "Reading novels and exploring new cafes",
+          "source": "Demo data",
+          "evidence": "Synthetic example"
+        }
+      ],
+      "lifestyle_signals": [],
+      "values_explicitly_stated": [],
+      "dating_preferences_explicitly_stated": [],
+      "conversation_topics": [
+        "Travel",
+        "Books",
+        "Food",
+        "Culture"
+      ],
+      "unknown_information": [
+        "Actual dating preferences are unknown"
+      ],
+      "short_summary": "Fictional digital marketer interested in writing, travel, food and culture."
+    }
+  }
+}
