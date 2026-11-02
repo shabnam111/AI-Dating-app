@@ -7,6 +7,70 @@ from apify_client import scrape_two_sources
 from research_agent import build_person_knowledge, build_from_participant_text
 from orchestrator import run_date
 
+def get_profile_terms(knowledge):
+    terms = set()
+
+    sections = [
+        "interests",
+        "hobbies",
+        "conversation_topics",
+        "values_explicitly_stated",
+        "dating_preferences_explicitly_stated"
+    ]
+
+    for section in sections:
+        for item in knowledge.get(section, []):
+            if isinstance(item, dict):
+                value = item.get("fact", "")
+            else:
+                value = str(item)
+
+            terms.update(value.lower().replace(",", " ").split())
+
+    return terms
+
+
+def calculate_compatibility(profile_a, profile_b):
+    terms_a = get_profile_terms(profile_a["knowledge"])
+    terms_b = get_profile_terms(profile_b["knowledge"])
+
+    shared = terms_a.intersection(terms_b)
+    total = terms_a.union(terms_b)
+
+    score = round(100 * len(shared) / len(total)) if total else 0
+
+    return {
+        "score": score,
+        "shared_terms": sorted(shared),
+        "evidence": (
+            "Shared profile keywords: " + ", ".join(sorted(shared))
+            if shared else "No exact shared keywords identified."
+        )
+    }
+
+
+def get_all_rankings(profiles):
+    rankings = []
+    keys = list(profiles.keys())
+
+    for i in range(len(keys)):
+        for j in range(i + 1, len(keys)):
+            a = profiles[keys[i]]
+            b = profiles[keys[j]]
+
+            result = calculate_compatibility(a, b)
+
+            rankings.append({
+                "participant_a": a["name"],
+                "participant_b": b["name"],
+                "score": result["score"],
+                "evidence": result["evidence"]
+            })
+
+    return sorted(rankings, key=lambda x: x["score"], reverse=True)
+from apify_client import scrape_two_sources
+from research_agent import build_person_knowledge, build_from_participant_text
+from orchestrator import run_date
 load_dotenv()
 
 # Permanent local storage
@@ -114,8 +178,12 @@ with st.sidebar:
     st.write("Apify token:", "Configured" if os.getenv("APIFY_API_TOKEN") else "Missing")
     st.caption("Keep API keys in .env. Never paste them into the app or commit them.")
 
-tab1, tab2, tab3 = st.tabs(["1 · Research agent", "2 · Knowledge profiles", "3 · Dating room"])
-
+tab1, tab2, tab3, tab4 = st.tabs([
+    "1 · Research agent",
+    "2 · Knowledge profiles",
+    "3 · Dating room",
+    "4 · Compatibility rankings"
+])
 with tab1:
     st.subheader("Create a person's knowledge base")
     st.info("Use only consenting adults who explicitly authorize this profile analysis. The app does not bypass logins, private accounts, or platform restrictions.")
@@ -246,3 +314,76 @@ with tab3:
 
 st.divider()
 st.caption("Important: Agent conclusions are experimental suggestions, not verified statements about a person. Participants should review their profiles and consent to any use of the results. The system does not infer sensitive traits.")
+
+with tab4:
+    st.subheader("AI Dating Compatibility Rankings")
+
+    profiles = st.session_state.profiles
+    keys = list(profiles.keys())
+
+    if len(keys) < 2:
+        st.info("At least two participant profiles are required.")
+    else:
+        st.markdown("### 1. Best matches for a participant")
+
+        selected = st.selectbox(
+            "Select participant",
+            keys,
+            format_func=lambda k: profiles[k]["name"],
+            key="ranking_person"
+        )
+
+        matches = []
+
+        for other_key in keys:
+            if other_key == selected:
+                continue
+
+            result = calculate_compatibility(
+                profiles[selected],
+                profiles[other_key]
+            )
+
+            matches.append({
+                "name": profiles[other_key]["name"],
+                "score": result["score"],
+                "evidence": result["evidence"]
+            })
+
+        matches.sort(key=lambda x: x["score"], reverse=True)
+
+        for rank, match in enumerate(matches, 1):
+            with st.expander(
+                f"#{rank} {match['name']} — {match['score']}%"
+            ):
+                st.progress(match["score"] / 100)
+                st.write(match["evidence"])
+
+        st.divider()
+
+        st.markdown("### 2. Overall compatibility leaderboard")
+
+        rankings = get_all_rankings(profiles)
+
+        for rank, item in enumerate(rankings, 1):
+            st.markdown(
+                f"**#{rank} {item['participant_a']} × "
+                f"{item['participant_b']}**"
+            )
+            st.progress(item["score"] / 100)
+            st.caption(
+                f"{item['score']}% — {item['evidence']}"
+            )
+
+        st.download_button(
+            "Download compatibility rankings",
+            json.dumps(rankings, indent=2),
+            file_name="compatibility_rankings.json",
+            mime="application/json"
+        )
+
+        st.caption(
+            "These are preliminary keyword-overlap scores, "
+            "not scientifically validated compatibility predictions. "
+            "Missing information is not evidence of incompatibility."
+        )
